@@ -7,106 +7,76 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div id="app">
-    <!-- Step 1: Login -->
-    <section id="loginSection" class="active-section">
-      <h1>Welcome to Smart Quiz App</h1>
-      <p>Login with your social account or continue as guest</p>
-      <div class="login-buttons">
-        <button class="google">Login with Google</button>
-        <button class="facebook">Login with Facebook</button>
-        <button id="skipLogin">Continue as Guest</button>
-      </div>
-    </section>
+  <header><h1>📘 Smart Quiz App</h1></header>
 
-    <!-- Step 2: Upload / Load -->
-    <section id="uploadSection">
-      <h2>Upload or Load Quiz</h2>
-      <div class="upload-container">
-        <input type="file" id="fileInput" accept=".csv" />
-        <button id="downloadTemplate">Download Template CSV</button>
-        <button id="loadSaved">Load Saved Quiz</button>
-      </div>
-      <table id="csvPreview" class="hidden">
-        <thead>
-          <tr>
-            <th>Question</th>
-            <th>A</th>
-            <th>B</th>
-            <th>C</th>
-            <th>D</th>
-            <th>Answer</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-      <button id="startSetup">Next → Set Timer</button>
-    </section>
+  <section id="step1" class="card">
+    <h2>Step 1: Upload or Create Quiz</h2>
+    <button id="downloadTemplate">📥 Download Template CSV</button>
+    <input type="file" id="csvFile" accept=".csv" />
+    <button id="loadCSV">📂 Load CSV</button>
+    <button id="createManual">✏ Create Questions Manually</button>
 
-    <!-- Step 3: Quiz Window -->
-    <section id="quizSection">
-      <div class="quiz-header">
-        <div class="score-display">Score: <span id="score">0</span></div>
-        <div class="timer-circle">
-          <svg>
-            <circle cx="50" cy="50" r="45" stroke="#ccc" stroke-width="8" fill="none"></circle>
-            <circle id="timerCircle" cx="50" cy="50" r="45" stroke="#4caf50" stroke-width="8" fill="none"></circle>
-          </svg>
-          <span id="timeText">00:00</span>
-        </div>
+    <div id="manualForm" class="hidden">
+      <h3>Create Questions</h3>
+      <div class="table-container">
+        <table id="manualTable">
+          <thead>
+            <tr>
+              <th>S.No</th><th>Question</th><th>A</th><th>B</th>
+              <th>C</th><th>D</th><th>Answer</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
       </div>
-      <div id="questionCard">
-        <h3 id="questionText">Question Text</h3>
-        <div class="options">
-          <button class="option-btn" data-opt="A"></button>
-          <button class="option-btn" data-opt="B"></button>
-          <button class="option-btn" data-opt="C"></button>
-          <button class="option-btn" data-opt="D"></button>
-        </div>
-      </div>
-      <div class="quiz-controls">
-        <button id="prevBtn">Previous</button>
-        <button id="skipBtn">Skip</button>
-        <button id="nextBtn">Next</button>
-      </div>
-    </section>
+      <button id="addQuestion">➕ Add Question</button>
+      <button id="saveManual">💾 Save Questions</button>
+    </div>
 
-    <!-- Step 4: Review & Share -->
-    <section id="reviewSection">
-      <h2>Quiz Review</h2>
-      <table id="reviewTable">
-        <thead>
-          <tr>
-            <th>Question</th>
-            <th>Your Answer</th>
-            <th>Correct Answer</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-      <button id="printBtn">Print Review</button>
-      <button id="shareBtn">Go to Share</button>
-    </section>
+    <div id="csvPreview" class="table-container"></div>
 
-    <!-- Step 5: Share -->
-    <section id="shareSection">
-      <h2>Share Quiz or Score</h2>
-      <label><input type="radio" name="shareType" value="quiz" checked> Share Quiz</label>
-      <label><input type="radio" name="shareType" value="score"> Share Score</label>
-      <button id="generateLinkBtn">Generate Link</button>
-      <div class="share-box hidden">
-        <input type="text" id="shareLink" readonly />
-        <button id="copyLinkBtn">Copy Link</button>
-        <div class="share-buttons">
-          <button class="whatsapp">WhatsApp</button>
-          <button class="gmail">Gmail</button>
-          <button class="facebook">Facebook</button>
-        </div>
-      </div>
-    </section>
-  </div>
+    <h3>Exam Settings</h3>
+    <label><input type="radio" name="timeMode" value="perQ" /> Per-Question Time</label>
+    <label><input type="radio" name="timeMode" value="total" /> Total Exam Time</label>
+    <input type="number" id="timeInput" placeholder="Time (seconds)" />
+    <br /><br />
+    <label><input type="radio" name="markMode" value="perQ" /> Per-Question Marks</label>
+    <label><input type="radio" name="markMode" value="total" /> Total Marks</label>
+    <input type="number" id="markInput" placeholder="Marks" />
+    <input type="number" id="passMarks" placeholder="Minimum Pass Marks" />
 
-  <div id="toast" class="hidden">✅ Link Copied!</div>
+    <button id="startQuiz">🚀 Start Quiz</button>
+  </section>
+
+  <section id="quizSection" class="card hidden">
+    <div class="quiz-header">
+      <span id="timer">⏰ 00:00</span>
+      <span id="scoreDisplay">Score: 0</span>
+    </div>
+    <div id="questionArea"></div>
+    <div class="nav-buttons">
+      <button id="prevBtn">⬅ Previous</button>
+      <button id="skipBtn">⏭ Skip</button>
+    </div>
+  </section>
+
+  <section id="reviewSection" class="card hidden">
+    <h2>📊 Review & Results</h2>
+    <div id="reviewTable"></div>
+    <div id="finalScore"></div>
+    <button id="printReview">🖨 Print</button>
+    <div id="shareLinks"></div>
+  </section>
+
+  <section id="themeSection" class="card">
+    <h2>🎨 Theme Settings</h2>
+    <label>Background <input type="color" id="bgColor" /></label>
+    <label>Text <input type="color" id="textColor" /></label>
+    <label>Button <input type="color" id="btnColor" /></label>
+    <button id="saveTheme">💾 Save Theme</button>
+    <button id="resetTheme">♻ Reset Default</button>
+  </section>
+
   <script src="script.js"></script>
 </body>
 </html>

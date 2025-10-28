@@ -1,112 +1,52 @@
 body {
-  font-family: "Noto Sans", "Segoe UI", sans-serif;
-  background: linear-gradient(135deg, #eceff1, #f5f5f5);
+  font-family: "Noto Sans", sans-serif;
+  background: var(--bg, #f4f6f9);
+  color: var(--text, #000);
   margin: 0;
   padding: 0;
+}
+header {
+  background: #007bff;
+  color: #fff;
   text-align: center;
-  color: #333;
+  padding: 1rem;
 }
-h1, h2, h3 {
-  font-weight: 600;
-}
-section {
-  display: none;
+.card {
+  background: #fff;
+  max-width: 750px;
+  margin: 20px auto;
   padding: 20px;
-  max-width: 800px;
-  margin: 0 auto;
-}
-.active-section {
-  display: block;
+  border-radius: 12px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 button {
-  margin: 10px;
-  padding: 12px 24px;
-  border: none;
-  border-radius: 8px;
-  background: #1976d2;
+  background: var(--btn, #007bff);
   color: #fff;
-  font-size: 16px;
+  padding: 10px 18px;
+  margin: 5px;
+  border: none;
+  border-radius: 6px;
   cursor: pointer;
-  transition: 0.3s;
-}
-button:hover {
-  background: #0d47a1;
-}
-.login-buttons button {
-  width: 80%;
-  max-width: 300px;
-}
-.google { background: #db4437; }
-.facebook { background: #3b5998; }
-#skipLogin { background: #555; }
-
-.upload-container {
-  margin: 20px 0;
-}
-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 10px;
-}
-th, td {
-  border: 1px solid #ccc;
-  padding: 10px;
-  font-size: 14px;
-}
-.timer-circle {
-  position: relative;
-  width: 100px;
-  height: 100px;
-  margin: auto;
-}
-.timer-circle svg {
-  transform: rotate(-90deg);
-  width: 100px;
-  height: 100px;
-}
-#timerCircle {
-  stroke-dasharray: 283;
-  stroke-dashoffset: 0;
-  transition: stroke-dashoffset 1s linear;
-}
-#timeText {
-  position: absolute;
-  top: 35%;
-  left: 0;
-  right: 0;
-  text-align: center;
-  font-size: 20px;
   font-weight: bold;
 }
-.option-btn {
-  display: block;
-  width: 100%;
-  margin: 8px 0;
-  background: #eee;
-  color: #000;
-  font-size: 16px;
-}
-.option-btn.correct { background: #4caf50; color: #fff; }
-.option-btn.wrong { background: #f44336; color: #fff; }
-
-.quiz-controls {
-  margin-top: 10px;
-}
-#toast {
-  position: fixed;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: #333;
+button:hover { opacity: 0.9; }
+.hidden { display: none; }
+.table-container { overflow-x: auto; margin-top: 10px; }
+table { width: 100%; border-collapse: collapse; }
+th, td { border: 1px solid #ddd; padding: 8px; }
+th { background: #007bff; color: #fff; }
+.correct { color: green; font-weight: bold; }
+.wrong { color: red; font-weight: bold; }
+.quiz-header { display: flex; justify-content: space-between; font-size: 1.2em; margin-bottom: 10px; }
+#questionArea {
+  background: #222;
   color: #fff;
-  padding: 10px 20px;
   border-radius: 8px;
-  opacity: 0.9;
+  padding: 15px;
+  font-size: 1.2em;
 }
-.hidden {
-  display: none;
-}
-@media screen and (max-width: 600px) {
-  button { font-size: 14px; padding: 10px; }
-  #timeText { font-size: 16px; }
+.optBtn { display: block; width: 100%; margin: 6px 0; text-align: left; }
+@media (max-width: 600px) {
+  .card { margin: 10px; padding: 15px; }
+  #questionArea { font-size: 1em; }
 }

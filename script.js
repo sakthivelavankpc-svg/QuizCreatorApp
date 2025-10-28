@@ -1,178 +1,185 @@
-let quizData = [];
-let currentQuestion = 0;
-let score = 0;
-let timer, totalTime = 15;
-let isQuizRunning = false;
+let questions = [];
+let current = 0, score = 0;
+let timerInterval, timeLeft = 0;
+let perQuestionTime = false, perQuestionMark = false;
 
-const loginSection = document.getElementById("loginSection");
-const uploadSection = document.getElementById("uploadSection");
-const quizSection = document.getElementById("quizSection");
-const reviewSection = document.getElementById("reviewSection");
-const shareSection = document.getElementById("shareSection");
-const timerCircle = document.getElementById("timerCircle");
-const timeText = document.getElementById("timeText");
-const questionText = document.getElementById("questionText");
-const optionButtons = document.querySelectorAll(".option-btn");
-const scoreDisplay = document.getElementById("score");
-const toast = document.getElementById("toast");
-
-function showSection(section) {
-  document.querySelectorAll("section").forEach(sec => sec.classList.remove("active-section"));
-  section.classList.add("active-section");
-}
-
-document.getElementById("skipLogin").onclick = () => showSection(uploadSection);
-document.querySelector(".google").onclick = () => showSection(uploadSection);
-document.querySelector(".facebook").onclick = () => showSection(uploadSection);
+const manualTableBody = document.querySelector("#manualTable tbody");
 
 document.getElementById("downloadTemplate").onclick = () => {
-  const csvContent = "s.no,QUESTION,A,B,C,D,ANSWER\n1,Sample Question?,A1,B1,C1,D1,A";
-  const blob = new Blob([csvContent], { type: "text/csv" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url; a.download = "quiz_template.csv"; a.click();
+  const csv = "data:text/csv;charset=utf-8," +
+    "s.no,QUESTION,A,B,C,D,ANSWER\n1,What is 2+2?,2,3,4,5,4\n";
+  const link = document.createElement("a");
+  link.href = encodeURI(csv);
+  link.download = "quiz_template.csv";
+  link.click();
 };
 
-document.getElementById("fileInput").addEventListener("change", e => {
-  const file = e.target.files[0];
-  if (!file) return;
+// Manual question table
+document.getElementById("createManual").onclick = () => {
+  document.getElementById("manualForm").classList.remove("hidden");
+};
+document.getElementById("addQuestion").onclick = () => {
+  const n = manualTableBody.children.length + 1;
+  if (n > 150) return alert("Maximum 150 questions!");
+  const row = document.createElement("tr");
+  row.innerHTML = `
+    <td>${n}</td>
+    <td contenteditable></td>
+    <td contenteditable></td>
+    <td contenteditable></td>
+    <td contenteditable></td>
+    <td contenteditable></td>
+    <td contenteditable></td>`;
+  manualTableBody.appendChild(row);
+};
+document.getElementById("saveManual").onclick = () => {
+  questions = [...manualTableBody.children].map((r, i) => ({
+    s_no: i + 1,
+    question: r.children[1].innerText,
+    A: r.children[2].innerText,
+    B: r.children[3].innerText,
+    C: r.children[4].innerText,
+    D: r.children[5].innerText,
+    answer: r.children[6].innerText.trim()
+  }));
+  if (!questions.length) return alert("Add at least one question!");
+  showCSVPreview();
+};
+
+document.getElementById("loadCSV").onclick = () => {
+  const file = document.getElementById("csvFile").files[0];
+  if (!file) return alert("Select a CSV file!");
   const reader = new FileReader();
-  reader.onload = ev => {
-    const lines = ev.target.result.split("\n").slice(1);
-    quizData = lines.map(line => {
-      const [_, q, a, b, c, d, ans] = line.split(",");
-      return { q, options: [a, b, c, d], answer: ans.trim() };
-    }).filter(q => q.q);
-    localStorage.setItem("savedQuiz", JSON.stringify(quizData));
-    previewCSV();
+  reader.onload = e => {
+    const lines = e.target.result.split("\n").slice(1);
+    questions = lines.filter(l => l.trim()).map((l, i) => {
+      const p = l.split(",");
+      return { s_no: i + 1, question: p[1], A: p[2], B: p[3], C: p[4], D: p[5], answer: p[6]?.trim() };
+    });
+    showCSVPreview();
   };
   reader.readAsText(file);
-});
+};
 
-function previewCSV() {
-  const tbody = document.querySelector("#csvPreview tbody");
-  tbody.innerHTML = "";
-  quizData.forEach(q => {
-    const tr = document.createElement("tr");
-    tr.innerHTML = `<td>${q.q}</td><td>${q.options[0]}</td><td>${q.options[1]}</td><td>${q.options[2]}</td><td>${q.options[3]}</td><td>${q.answer}</td>`;
-    tbody.appendChild(tr);
-  });
-  document.getElementById("csvPreview").classList.remove("hidden");
+function showCSVPreview() {
+  const div = document.getElementById("csvPreview");
+  div.innerHTML = `
+    <table><tr><th>Q.No</th><th>Question</th><th>A</th><th>B</th><th>C</th><th>D</th><th>Answer</th></tr>
+    ${questions.map(q => `<tr><td>${q.s_no}</td><td>${q.question}</td><td>${q.A}</td><td>${q.B}</td><td>${q.C}</td><td>${q.D}</td><td>${q.answer}</td></tr>`).join("")}</table>`;
 }
 
-document.getElementById("startSetup").onclick = () => startQuiz();
+document.getElementById("startQuiz").onclick = () => {
+  if (!questions.length) return alert("Load or create questions first!");
+  document.getElementById("step1").classList.add("hidden");
+  document.getElementById("quizSection").classList.remove("hidden");
 
-function startQuiz() {
-  if (!quizData.length) {
-    const saved = localStorage.getItem("savedQuiz");
-    if (saved) quizData = JSON.parse(saved);
-    else return alert("Please upload or load a quiz first!");
-  }
-  score = 0;
-  currentQuestion = 0;
-  isQuizRunning = true;
-  showSection(quizSection);
-  renderQuestion();
+  const tmode = document.querySelector('input[name="timeMode"]:checked')?.value;
+  const mmode = document.querySelector('input[name="markMode"]:checked')?.value;
+  perQuestionTime = tmode === "perQ";
+  perQuestionMark = mmode === "perQ";
+
+  const baseTime = parseInt(document.getElementById("timeInput").value) || 10;
+  timeLeft = perQuestionTime ? baseTime : Math.floor(baseTime / questions.length);
+  score = 0; current = 0;
+  loadQuestion();
+};
+
+function loadQuestion() {
+  if (current >= questions.length) return showReview();
+  const q = questions[current];
+  const qa = document.getElementById("questionArea");
+  qa.innerHTML = `
+    <h3>${q.s_no}. ${q.question}</h3>
+    ${["A", "B", "C", "D"].map(o => `<button class="optBtn" data-opt="${q[o]}">${o}. ${q[o]}</button>`).join("")}`;
+  qa.querySelectorAll(".optBtn").forEach(btn =>
+    btn.onclick = () => checkAnswer(btn)
+  );
   startTimer();
 }
 
-function renderQuestion() {
-  const q = quizData[currentQuestion];
-  questionText.textContent = q.q;
-  optionButtons.forEach((btn, i) => {
-    btn.textContent = q.options[i];
-    btn.className = "option-btn";
-  });
-}
-
-optionButtons.forEach(btn => btn.onclick = () => {
-  if (!isQuizRunning) return;
-  const selected = btn.dataset.opt;
-  const q = quizData[currentQuestion];
-  if (selected === q.answer) {
-    btn.classList.add("correct");
-    score++;
-    scoreDisplay.textContent = score;
-  } else btn.classList.add("wrong");
-  setTimeout(nextQuestion, 1000);
-});
-
-document.getElementById("nextBtn").onclick = nextQuestion;
-document.getElementById("prevBtn").onclick = () => {
-  if (currentQuestion > 0) {
-    currentQuestion--;
-    renderQuestion();
-  }
-};
-document.getElementById("skipBtn").onclick = nextQuestion;
-
-function nextQuestion() {
-  if (++currentQuestion < quizData.length) renderQuestion();
-  else endQuiz();
+function checkAnswer(btn) {
+  const q = questions[current];
+  const sel = btn.dataset.opt.trim();
+  q.userAnswer = sel;
+  const markVal = parseFloat(document.getElementById("markInput").value) || 1;
+  const eachMark = perQuestionMark ? markVal : markVal / questions.length;
+  if (sel === q.answer.trim()) {
+    score += eachMark;
+    btn.style.background = "green";
+  } else btn.style.background = "red";
+  document.getElementById("scoreDisplay").textContent = `Score: ${score.toFixed(2)}`;
+  clearInterval(timerInterval);
+  setTimeout(() => { current++; loadQuestion(); }, 4000);
 }
 
 function startTimer() {
-  let time = totalTime;
-  const circumference = 283;
-  timer = setInterval(() => {
-    const offset = circumference - (time / totalTime) * circumference;
-    timerCircle.style.strokeDashoffset = offset;
-    timeText.textContent = time;
-    if (--time < 0) {
-      clearInterval(timer);
-      nextQuestion();
+  clearInterval(timerInterval);
+  let seconds = parseInt(document.getElementById("timeInput").value) || 10;
+  timeLeft = perQuestionTime ? seconds : timeLeft;
+  document.getElementById("timer").textContent = `⏰ ${timeLeft}s`;
+  timerInterval = setInterval(() => {
+    timeLeft--;
+    document.getElementById("timer").textContent = `⏰ ${timeLeft}s`;
+    if (timeLeft <= 0) {
+      clearInterval(timerInterval);
+      current++;
+      loadQuestion();
     }
   }, 1000);
 }
 
-function endQuiz() {
-  isQuizRunning = false;
-  showSection(reviewSection);
-  const tbody = document.querySelector("#reviewTable tbody");
-  tbody.innerHTML = "";
-  quizData.forEach(q => {
-    const userAns = "—";
-    const color = (userAns === q.answer) ? "green" : "red";
-    const tr = document.createElement("tr");
-    tr.innerHTML = `<td>${q.q}</td><td style="color:${color}">${userAns}</td><td>${q.answer}</td>`;
-    tbody.appendChild(tr);
-  });
+function showReview() {
+  document.getElementById("quizSection").classList.add("hidden");
+  document.getElementById("reviewSection").classList.remove("hidden");
+  const pass = parseFloat(document.getElementById("passMarks").value) || 0;
+  const result = score >= pass ? "✅ Qualified" : "❌ Not Qualified";
+  document.getElementById("finalScore").innerHTML = `<h3>Total Score: ${score.toFixed(2)} / ${result}</h3>`;
+  const rows = questions.map(q => {
+    const correct = q.userAnswer?.trim() === q.answer?.trim();
+    return `<tr><td>${q.s_no}</td><td>${q.question}</td>
+      <td class="${correct ? "correct" : "wrong"}">${q.userAnswer || "-"}</td>
+      <td>${q.answer}</td></tr>`;
+  }).join("");
+  document.getElementById("reviewTable").innerHTML =
+    `<table><tr><th>S.No</th><th>Question</th><th>Selected</th><th>Answer</th></tr>${rows}</table>`;
+
+  const json = encodeURIComponent(JSON.stringify(questions));
+  const quizLink = `${window.location.origin}${window.location.pathname}?quiz=${json}`;
+  document.getElementById("shareLinks").innerHTML =
+    `<p>🔗 Share this Quiz Link:</p><a href="${quizLink}" target="_blank">${quizLink}</a>`;
 }
 
-document.getElementById("printBtn").onclick = () => window.print();
-document.getElementById("shareBtn").onclick = () => showSection(shareSection);
-
-document.getElementById("generateLinkBtn").onclick = () => {
-  const shareType = document.querySelector('input[name="shareType"]:checked').value;
-  const quizID = Date.now().toString(36);
-  localStorage.setItem("quiz_" + quizID, JSON.stringify(quizData));
-  const url = `${window.location.origin}${window.location.pathname}?quizID=${quizID}&type=${shareType}`;
-  document.getElementById("shareLink").value = url;
-  document.querySelector(".share-box").classList.remove("hidden");
-};
-
-document.getElementById("copyLinkBtn").onclick = () => {
-  const input = document.getElementById("shareLink");
-  input.select();
-  document.execCommand("copy");
-  showToast("✅ Link copied!");
-};
-
-function showToast(msg) {
-  toast.textContent = msg;
-  toast.classList.remove("hidden");
-  setTimeout(() => toast.classList.add("hidden"), 2000);
+// Theme
+function applyTheme() {
+  const t = JSON.parse(localStorage.getItem("theme") || "{}");
+  document.documentElement.style.setProperty("--bg", t.bg || "#f4f6f9");
+  document.documentElement.style.setProperty("--text", t.text || "#000");
+  document.documentElement.style.setProperty("--btn", t.btn || "#007bff");
 }
+applyTheme();
+document.getElementById("saveTheme").onclick = () => {
+  const t = {
+    bg: bgColor.value,
+    text: textColor.value,
+    btn: btnColor.value
+  };
+  localStorage.setItem("theme", JSON.stringify(t));
+  applyTheme();
+};
+document.getElementById("resetTheme").onclick = () => {
+  localStorage.removeItem("theme");
+  applyTheme();
+};
 
-window.onload = () => {
-  const params = new URLSearchParams(window.location.search);
-  const quizID = params.get("quizID");
-  if (quizID) {
-    const loaded = localStorage.getItem("quiz_" + quizID);
-    if (loaded) {
-      quizData = JSON.parse(loaded);
-      showSection(uploadSection);
-      previewCSV();
-    }
+// Load quiz if shared
+window.addEventListener("load", () => {
+  const params = new URLSearchParams(location.search);
+  if (params.has("quiz")) {
+    try {
+      questions = JSON.parse(decodeURIComponent(params.get("quiz")));
+      document.getElementById("step1").classList.add("hidden");
+      document.getElementById("quizSection").classList.remove("hidden");
+      score = 0; current = 0; loadQuestion();
+    } catch { console.error("Invalid quiz data"); }
   }
-};
+});
