@@ -1,96 +1,140 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Smart Quiz App</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Quiz Creator — Sakthi Velavan K</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <header><h1>📘 Smart Quiz App</h1></header>
-    <div id="visitorBox" class="visitor-box">
-  <h3>📊 Visitor Counter</h3>
-  <div class="counter-display" id="totalVisits">000000</div>
-  <table class="visitor-stats">
-    <tr><td>👤 Today</td><td id="todayVisits">0</td></tr>
-    <tr><td>👥 Yesterday</td><td id="yesterdayVisits">0</td></tr>
-    <tr><td>📅 This week</td><td id="weekVisits">0</td></tr>
-    <tr><td>📆 Last week</td><td id="lastWeekVisits">0</td></tr>
-    <tr><td>🗓 This month</td><td id="monthVisits">0</td></tr>
-    <tr><td>🗓 Last month</td><td id="lastMonthVisits">0</td></tr>
-  </table>
-  <div class="online-info" id="onlineInfo">Online: 1</div>
-  <div class="visitor-footer">Visitors Counter 1.0</div>
-</div>
-  <section id="step1" class="card">
-    <h2>Step 1: Upload or Create Quiz</h2>
-    <button id="downloadTemplate">📥 Download Template CSV</button>
-    <input type="file" id="csvFile" accept=".csv" />
-    <button id="loadCSV">📂 Load CSV</button>
-    <button id="createManual">✏ Create Questions Manually</button>
+  <header class="about-section">
+    <h1>📘 Quiz Creator</h1>
+    <p>by <strong>Sakthi Velavan K</strong> — 
+      <a href="https://www.youtube.com/@KALVIKADAL" target="_blank">@KALVIKADAL</a>
+    </p>
+  </header>
 
-    <div id="manualForm" class="hidden">
-      <h3>Create Questions</h3>
-      <div class="table-container">
-        <table id="manualTable">
-          <thead>
-            <tr>
-              <th>S.No</th><th>Question</th><th>A</th><th>B</th>
-              <th>C</th><th>D</th><th>Answer</th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
+  <!-- 👁️ Compact Visitor Counter -->
+  <div id="visitCounter" class="visit-counter" aria-hidden="false">
+    <div class="label">👁️ Total Visits:</div>
+    <div id="visitDigits" class="digits">000000</div>
+  </div>
+
+  <main class="container" id="appContainer">
+    <section class="top-controls">
+      <div class="theme-controls">
+        <label>Theme:
+          <select id="themeSelect">
+            <option value="light">Light</option>
+            <option value="dark">Dark</option>
+            <option value="custom">Custom</option>
+          </select>
+        </label>
+        <input id="customColor" type="color" value="#0055aa" title="Custom color" />
       </div>
-      <button id="addQuestion">➕ Add Question</button>
-      <button id="saveManual">💾 Save Questions</button>
-    </div>
 
-    <div id="csvPreview" class="table-container"></div>
+      <div class="actions">
+        <input id="csvFileInput" type="file" accept=".csv" hidden />
+        <button id="loadCSVBtn">📂 Load CSV</button>
+        <button id="createManualBtn">✏️ Manual Editor</button>
+        <button id="homeBtn">🏠 Home</button>
+      </div>
+    </section>
 
-    <h3>Exam Settings</h3>
-    <label><input type="radio" name="timeMode" value="perQ" /> Per-Question Time</label>
-    <label><input type="radio" name="timeMode" value="total" /> Total Exam Time</label>
-    <input type="number" id="timeInput" placeholder="Time (seconds)" />
-    <br /><br />
-    <label><input type="radio" name="markMode" value="perQ" /> Per-Question Marks</label>
-    <label><input type="radio" name="markMode" value="total" /> Total Marks</label>
-    <input type="number" id="markInput" placeholder="Marks" />
-    <input type="number" id="passMarks" placeholder="Minimum Pass Marks" />
+    <section class="config-row" id="configRow">
+      <div class="config-block">
+        <h4>Timing</h4>
+        <label>Total time (minutes): <input id="totalMinutes" type="number" min="0" placeholder="0" /></label><br/>
+        <label>Per-question (seconds): <input id="perQuestionSeconds" type="number" min="0" placeholder="0" /></label>
+        <p class="muted">If Total time &gt; 0 it will be used (outer ring). Per-question time (inner ring) runs if &gt;0.</p>
+      </div>
 
-    <button id="startQuiz">🚀 Start Quiz</button>
-  </section>
+      <div class="config-block">
+        <h4>Marks & Pass</h4>
+        <label>Total marks: <input id="totalMarks" type="number" min="1" value="100" /></label><br/>
+        <label>Minimum pass: <input id="minPassMarks" type="number" min="0" value="40" /></label>
+      </div>
+    </section>
 
-  <section id="quizSection" class="card hidden">
-    <div class="quiz-header">
-      <span id="timer">⏰ 00:00</span>
-      <span id="scoreDisplay">Score: 0</span>
-    </div>
-    <div id="questionArea"></div>
-    <div class="nav-buttons">
-      <button id="prevBtn">⬅ Previous</button>
-      <button id="skipBtn">⏭ Skip</button>
-    </div>
-  </section>
+    <section id="manualSection" class="panel hidden">
+      <h3>Manual Quiz Creator</h3>
+      <table id="manualTable"><thead><tr><th>#</th><th>Question</th><th>A</th><th>B</th><th>C</th><th>D</th><th>Answer</th><th>Action</th></tr></thead>
+        <tbody></tbody></table>
+      <div class="manual-actions">
+        <button id="addRowBtn">➕ Add Question</button>
+        <button id="startQuizBtn_manual">🚀 Start Quiz</button>
+      </div>
+    </section>
 
-  <section id="reviewSection" class="card hidden">
-    <h2>📊 Review & Results</h2>
-    <div id="reviewTable"></div>
-    <div id="finalScore"></div>
-    <button id="printReview">🖨 Print</button>
-    <div id="shareLinks"></div>
-  </section>
+    <section id="csvPreview" class="panel hidden">
+      <h3>CSV Preview</h3>
+      <div id="csvTableContainer"></div>
+      <div class="csv-actions">
+        <button id="importCsvToManualBtn">➕ Import to Manual</button>
+        <button id="startQuizBtn_csv">🚀 Start Quiz (From CSV)</button>
+      </div>
+    </section>
 
-  <section id="themeSection" class="card">
-    <h2>🎨 Theme Settings</h2>
-    <label>Background <input type="color" id="bgColor" /></label>
-    <label>Text <input type="color" id="textColor" /></label>
-    <label>Button <input type="color" id="btnColor" /></label>
-    <button id="saveTheme">💾 Save Theme</button>
-    <button id="resetTheme">♻ Reset Default</button>
-  </section>
+    <section id="quizSection" class="quiz-panel hidden">
+      <div id="quizInner">
+        <div class="quiz-top">
+          <div class="timer-wrap" aria-hidden="true">
+            <svg id="totalTimerSVG" class="timerSvg total" viewBox="0 0 100 100">
+              <circle cx="50" cy="50" r="44" class="bgCircle"></circle>
+              <circle cx="50" cy="50" r="44" class="progressCircle totalProgress"></circle>
+            </svg>
+            <svg id="questionTimerSVG" class="timerSvg question" viewBox="0 0 100 100">
+              <circle cx="50" cy="50" r="32" class="bgCircle"></circle>
+              <circle cx="50" cy="50" r="32" class="progressCircle questionProgress"></circle>
+            </svg>
+          </div>
+          <div class="scoreBox">
+            <p id="timerLabel">⏱️ --</p>
+            <p id="scoreDisplay">Score: 0 / 0</p>
+          </div>
+        </div>
+        <div id="questionBox" class="question-box"></div>
+        <div id="optionsBox" class="options-box"></div>
+        <div class="quiz-actions">
+          <button id="prevBtn">⬅️ Prev</button>
+          <button id="nextBtn">➡️ Next</button>
+          <button id="finishBtn">🏁 Finish</button>
+        </div>
+        <div class="muted small" id="autoAdvanceNotice">Auto-advancing in <span id="autoCount">4</span>s...</div>
+      </div>
+    </section>
+
+    <section id="reviewSection" class="panel hidden">
+      <h3>📋 Review</h3>
+      <div id="reviewTableContainer"></div>
+      <div id="passFailText" class="pass-fail"></div>
+      <div class="review-actions">
+        <button id="printReviewBtn">🖨️ Print Review</button>
+        <button id="downloadJsonBtn">⬇️ Download JSON</button>
+        <button id="openHtmlPreviewBtn">👁️ Open HTML Preview</button>
+        <button id="shareWhatsappBtn">📱 Share WhatsApp</button>
+        <button id="shareGmailBtn">✉️ Share Email</button>
+        <button id="closeReviewBtn">Close Review</button>
+      </div>
+    </section>
+  </main>
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js"></script>
+
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyAFr17zXqRQMpq-Guzh0nFKOiGGPAxiMHs",
+    authDomain: "quizcreatorapp-1d014.firebaseapp.com",
+    projectId: "quizcreatorapp-1d014",
+    storageBucket: "quizcreatorapp-1d014.firebasestorage.app",
+    messagingSenderId: "609023462039",
+    appId: "1:609023462039:web:da5a2f0af8f24f85be77d2"
+  };
+  firebase.initializeApp(firebaseConfig);
+</script>
 
   <script src="script.js"></script>
 </body>
-
 </html>
