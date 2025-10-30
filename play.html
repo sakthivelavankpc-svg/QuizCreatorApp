@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>QuizCreatorApp — Play Quiz</title>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+  <!-- ===== Header / Navigation ===== -->
+  <header class="about-section">
+    <h1>🎮 Play Quiz</h1>
+    <p>by <strong>Sakthi Velavan K</strong> —
+      <a href="https://www.youtube.com/@KALVIKADAL" target="_blank">@KALVIKADAL</a>
+    </p>
+    <nav class="top-nav">
+      <a href="index.html">Home</a>
+      <a href="browse.html">Browse</a>
+      <a href="about.html">About</a>
+    </nav>
+  </header>
+
+  <!-- 👁 Global Visitor Counter -->
+  <div id="visitCounter" class="visit-counter">
+    <div class="label">👁️ Total Visits:</div>
+    <div id="visitDigits" class="digits">000000</div>
+  </div>
+
+  <!-- 🧠 Quiz Play Container -->
+  <main id="playContainer" class="container">
+    <h2 id="quizTitlePlay">Loading quiz …</h2>
+    <div id="questionArea" class="question-area"></div>
+
+    <!-- Results / Review -->
+    <div id="reviewArea" class="hidden review-area">
+      <h3>Review & Score</h3>
+      <p id="finalScore"></p>
+      <button onclick="window.print()">🖨 Print Review</button>
+      <div id="reviewList"></div>
+    </div>
+  </main>
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
