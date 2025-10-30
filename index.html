@@ -8,7 +8,20 @@
 </head>
 <body>
   <header><h1>📘 Smart Quiz App</h1></header>
-   
+    <div id="visitorBox" class="visitor-box">
+  <h3>📊 Visitor Counter</h3>
+  <div class="counter-display" id="totalVisits">000000</div>
+  <table class="visitor-stats">
+    <tr><td>👤 Today</td><td id="todayVisits">0</td></tr>
+    <tr><td>👥 Yesterday</td><td id="yesterdayVisits">0</td></tr>
+    <tr><td>📅 This week</td><td id="weekVisits">0</td></tr>
+    <tr><td>📆 Last week</td><td id="lastWeekVisits">0</td></tr>
+    <tr><td>🗓 This month</td><td id="monthVisits">0</td></tr>
+    <tr><td>🗓 Last month</td><td id="lastMonthVisits">0</td></tr>
+  </table>
+  <div class="online-info" id="onlineInfo">Online: 1</div>
+  <div class="visitor-footer">Visitors Counter 1.0</div>
+</div>
   <section id="step1" class="card">
     <h2>Step 1: Upload or Create Quiz</h2>
     <button id="downloadTemplate">📥 Download Template CSV</button>
@@ -79,18 +92,5 @@
 
   <script src="script.js"></script>
 </body>
- <div id="visitorBox" class="visitor-box">
-  <h3>📊 Visitor Counter</h3>
-  <div class="counter-display" id="totalVisits">000000</div>
-  <table class="visitor-stats">
-    <tr><td>👤 Today</td><td id="todayVisits">0</td></tr>
-    <tr><td>👥 Yesterday</td><td id="yesterdayVisits">0</td></tr>
-    <tr><td>📅 This week</td><td id="weekVisits">0</td></tr>
-    <tr><td>📆 Last week</td><td id="lastWeekVisits">0</td></tr>
-    <tr><td>🗓 This month</td><td id="monthVisits">0</td></tr>
-    <tr><td>🗓 Last month</td><td id="lastMonthVisits">0</td></tr>
-  </table>
-  <div class="online-info" id="onlineInfo">Online: 1</div>
-  <div class="visitor-footer">Visitors Counter 1.0</div>
-</div>
+
 </html>
