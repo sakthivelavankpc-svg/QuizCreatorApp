@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>QuizCreatorApp — Browse Quizzes</title>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+  <!-- ========== Header + Navigation ========== -->
+  <header class="about-section">
+    <h1>📘 Browse Quizzes</h1>
+    <p>by <strong>Sakthi Velavan K</strong> — 
+      <a href="https://www.youtube.com/@KALVIKADAL" target="_blank">@KALVIKADAL</a>
+    </p>
+    <nav class="top-nav">
+      <a href="index.html">Home</a>
+      <a href="browse.html">Browse</a>
+      <a href="about.html">About</a>
+    </nav>
+  </header>
+
+  <!-- 👁 Global Visitor Counter -->
+  <div id="visitCounter" class="visit-counter">
+    <div class="label">👁️ Total Visits:</div>
+    <div id="visitDigits" class="digits">000000</div>
+  </div>
+
+  <!-- 🔍 Filters -->
+  <section class="container">
+    <h2>Available Quizzes</h2>
+    <div class="filter-row">
+      <select id="filterStandard">
+        <option value="">All Standards</option>
+        <script>
+          for(let i=1;i<=12;i++)
+            document.write(`<option value="${i}">${i}</option>`);
+        </script>
+      </select>
+      <select id="filterSubject">
+        <option value="">All Subjects</option>
+        <option>Tamil</option><option>English</option>
+        <option>Maths</option><option>Science</option><option>Social</option>
+      </select>
+      <select id="filterExam">
+        <option value="">All Exams</option>
+        <option>SSLC</option><option>TNPSC</option>
+        <option>TRB</option><option>POLICE</option><option>UPSC</option>
+      </select>
+      <button id="applyFilterBtn">Filter</button>
+    </div>
+
+    <!-- 🔹 Grid of Quiz Cards -->
+    <div id="quizGrid" class="quiz-grid">
+      <p class="muted">Loading quizzes from cloud ...</p>
+    </div>
+  </section>
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
