@@ -1,3 +1,37 @@
+/* ------------------------------
+   FIREBASE LOGIN + QUIZ STORAGE
+--------------------------------*/
+const auth = firebase.auth();
+const db   = firebase.database();
+
+function sendOTP(phoneNumber) {
+  window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('login-button', { size: 'invisible' });
+  auth.signInWithPhoneNumber(phoneNumber, window.recaptchaVerifier)
+    .then(result => { window.confirmationResult = result; alert('OTP sent!'); })
+    .catch(err => alert(err.message));
+}
+
+function verifyOTP(code) {
+  window.confirmationResult.confirm(code).then(result => {
+    const user = result.user;
+    alert('Login success for ' + user.phoneNumber);
+  });
+}
+
+// Example: save a quiz
+function saveQuizToFirebase(quizObject) {
+  db.ref("quizzes").push(quizObject)
+    .then(() => alert("Quiz saved online!"))
+    .catch(err => alert("Save failed: " + err.message));
+}
+
+// Example: list all quizzes
+function loadAllQuizzes() {
+  db.ref("quizzes").once("value").then(snapshot => {
+    snapshot.forEach(child => console.log(child.key, child.val()));
+  });
+}
+
 (() => {
   /* ============================
      VISITOR COUNTER (Local)

@@ -7,6 +7,13 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+  <div id="loginPanel">
+  <input id="phoneInput" placeholder="Enter phone e.g. +919876543210">
+  <button id="login-button" onclick="sendOTP(document.getElementById('phoneInput').value)">Send OTP</button>
+  <input id="otpInput" placeholder="Enter OTP">
+  <button onclick="verifyOTP(document.getElementById('otpInput').value)">Verify OTP</button>
+</div>
+
   <header class="about-section">
     <h1>📘 Quiz Creator</h1>
     <p>by <strong>Sakthi Velavan K</strong> — 
