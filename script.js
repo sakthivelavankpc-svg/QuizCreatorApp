@@ -1,122 +1,101 @@
 let questions = [];
 let current = 0, score = 0;
 let timerInterval, timeLeft = 0;
-let perQuestionTime = false, perQuestionMark = false;
+let perQuestionTime = false;
+let perQuestionMark = false;
 
-const manualTableBody = document.querySelector("#manualTable tbody");
-
-document.getElementById("downloadTemplate").onclick = () => {
-  const csv = "data:text/csv;charset=utf-8," +
+document.getElementById("downloadTemplate").addEventListener("click", () => {
+  const csvContent = "data:text/csv;charset=utf-8," +
     "s.no,QUESTION,A,B,C,D,ANSWER\n1,What is 2+2?,2,3,4,5,4\n";
   const link = document.createElement("a");
-  link.href = encodeURI(csv);
+  link.href = encodeURI(csvContent);
   link.download = "quiz_template.csv";
   link.click();
-};
+});
 
-// Manual question table
-document.getElementById("createManual").onclick = () => {
-  document.getElementById("manualForm").classList.remove("hidden");
-};
-document.getElementById("addQuestion").onclick = () => {
-  const n = manualTableBody.children.length + 1;
-  if (n > 150) return alert("Maximum 150 questions!");
-  const row = document.createElement("tr");
-  row.innerHTML = `
-    <td>${n}</td>
-    <td contenteditable></td>
-    <td contenteditable></td>
-    <td contenteditable></td>
-    <td contenteditable></td>
-    <td contenteditable></td>
-    <td contenteditable></td>`;
-  manualTableBody.appendChild(row);
-};
-document.getElementById("saveManual").onclick = () => {
-  questions = [...manualTableBody.children].map((r, i) => ({
-    s_no: i + 1,
-    question: r.children[1].innerText,
-    A: r.children[2].innerText,
-    B: r.children[3].innerText,
-    C: r.children[4].innerText,
-    D: r.children[5].innerText,
-    answer: r.children[6].innerText.trim()
-  }));
-  if (!questions.length) return alert("Add at least one question!");
-  showCSVPreview();
-};
+document.getElementById("loadCSV").addEventListener("click", () => {
+  const fileInput = document.getElementById("csvFile").files[0];
+  if (!fileInput) return alert("Please select a CSV file!");
 
-document.getElementById("loadCSV").onclick = () => {
-  const file = document.getElementById("csvFile").files[0];
-  if (!file) return alert("Select a CSV file!");
   const reader = new FileReader();
-  reader.onload = e => {
+  reader.onload = (e) => {
     const lines = e.target.result.split("\n").slice(1);
-    questions = lines.filter(l => l.trim()).map((l, i) => {
-      const p = l.split(",");
-      return { s_no: i + 1, question: p[1], A: p[2], B: p[3], C: p[4], D: p[5], answer: p[6]?.trim() };
+    questions = lines.filter(l => l.trim()).map((line, i) => {
+      const parts = line.split(",");
+      return {
+        s_no: i + 1,
+        question: parts[1],
+        A: parts[2],
+        B: parts[3],
+        C: parts[4],
+        D: parts[5],
+        answer: parts[6]?.trim()
+      };
     });
     showCSVPreview();
   };
-  reader.readAsText(file);
-};
+  reader.readAsText(fileInput);
+});
 
 function showCSVPreview() {
-  const div = document.getElementById("csvPreview");
-  div.innerHTML = `
-    <table><tr><th>Q.No</th><th>Question</th><th>A</th><th>B</th><th>C</th><th>D</th><th>Answer</th></tr>
-    ${questions.map(q => `<tr><td>${q.s_no}</td><td>${q.question}</td><td>${q.A}</td><td>${q.B}</td><td>${q.C}</td><td>${q.D}</td><td>${q.answer}</td></tr>`).join("")}</table>`;
+  const container = document.getElementById("csvPreview");
+  container.innerHTML = `
+    <table>
+      <tr><th>Q.No</th><th>Question</th><th>A</th><th>B</th><th>C</th><th>D</th><th>Answer</th></tr>
+      ${questions.map(q => `<tr><td>${q.s_no}</td><td>${q.question}</td><td>${q.A}</td><td>${q.B}</td><td>${q.C}</td><td>${q.D}</td><td>${q.answer}</td></tr>`).join("")}
+    </table>`;
 }
 
-document.getElementById("startQuiz").onclick = () => {
-  if (!questions.length) return alert("Load or create questions first!");
+document.getElementById("startQuiz").addEventListener("click", () => {
+  if (!questions.length) return alert("Load CSV or create questions first!");
   document.getElementById("step1").classList.add("hidden");
   document.getElementById("quizSection").classList.remove("hidden");
 
-  const tmode = document.querySelector('input[name="timeMode"]:checked')?.value;
-  const mmode = document.querySelector('input[name="markMode"]:checked')?.value;
-  perQuestionTime = tmode === "perQ";
-  perQuestionMark = mmode === "perQ";
+  const timeMode = document.querySelector('input[name="timeMode"]:checked')?.value;
+  perQuestionTime = timeMode === "perQ";
+  const markMode = document.querySelector('input[name="markMode"]:checked')?.value;
+  perQuestionMark = markMode === "perQ";
 
-  const baseTime = parseInt(document.getElementById("timeInput").value) || 10;
-  timeLeft = perQuestionTime ? baseTime : Math.floor(baseTime / questions.length);
-  score = 0; current = 0;
+  timeLeft = parseInt(document.getElementById("timeInput").value) || 10;
+  if (!perQuestionTime) timeLeft = Math.floor(timeLeft / questions.length);
+
+  score = 0;
+  current = 0;
   loadQuestion();
-};
+});
 
 function loadQuestion() {
   if (current >= questions.length) return showReview();
   const q = questions[current];
-  const qa = document.getElementById("questionArea");
-  qa.innerHTML = `
+  document.getElementById("questionArea").innerHTML = `
     <h3>${q.s_no}. ${q.question}</h3>
-    ${["A", "B", "C", "D"].map(o => `<button class="optBtn" data-opt="${q[o]}">${o}. ${q[o]}</button>`).join("")}`;
-  qa.querySelectorAll(".optBtn").forEach(btn =>
-    btn.onclick = () => checkAnswer(btn)
-  );
+    ${["A","B","C","D"].map(opt => `<button class="optBtn" data-opt="${q[opt]}">${opt}. ${q[opt]}</button>`).join("<br>")}
+  `;
+  document.querySelectorAll(".optBtn").forEach(btn => {
+    btn.addEventListener("click", () => checkAnswer(btn));
+  });
   startTimer();
 }
 
 function checkAnswer(btn) {
   const q = questions[current];
-  const sel = btn.dataset.opt.trim();
-  q.userAnswer = sel;
-  const markVal = parseFloat(document.getElementById("markInput").value) || 1;
-  const eachMark = perQuestionMark ? markVal : markVal / questions.length;
-  if (sel === q.answer.trim()) {
-    score += eachMark;
+  const selectedText = btn.getAttribute("data-opt").trim();
+  if (selectedText === q.answer.trim()) {
     btn.style.background = "green";
-  } else btn.style.background = "red";
-  document.getElementById("scoreDisplay").textContent = `Score: ${score.toFixed(2)}`;
-  clearInterval(timerInterval);
-  setTimeout(() => { current++; loadQuestion(); }, 4000);
+    score += perQuestionMark ? parseInt(document.getElementById("markInput").value || 1) : 1;
+  } else {
+    btn.style.background = "red";
+  }
+  setTimeout(() => {
+    current++;
+    loadQuestion();
+  }, 4000);
 }
 
 function startTimer() {
   clearInterval(timerInterval);
   let seconds = parseInt(document.getElementById("timeInput").value) || 10;
   timeLeft = perQuestionTime ? seconds : timeLeft;
-  document.getElementById("timer").textContent = `⏰ ${timeLeft}s`;
   timerInterval = setInterval(() => {
     timeLeft--;
     document.getElementById("timer").textContent = `⏰ ${timeLeft}s`;
@@ -131,55 +110,73 @@ function startTimer() {
 function showReview() {
   document.getElementById("quizSection").classList.add("hidden");
   document.getElementById("reviewSection").classList.remove("hidden");
-  const pass = parseFloat(document.getElementById("passMarks").value) || 0;
-  const result = score >= pass ? "✅ Qualified" : "❌ Not Qualified";
-  document.getElementById("finalScore").innerHTML = `<h3>Total Score: ${score.toFixed(2)} / ${result}</h3>`;
-  const rows = questions.map(q => {
-    const correct = q.userAnswer?.trim() === q.answer?.trim();
-    return `<tr><td>${q.s_no}</td><td>${q.question}</td>
-      <td class="${correct ? "correct" : "wrong"}">${q.userAnswer || "-"}</td>
-      <td>${q.answer}</td></tr>`;
-  }).join("");
-  document.getElementById("reviewTable").innerHTML =
-    `<table><tr><th>S.No</th><th>Question</th><th>Selected</th><th>Answer</th></tr>${rows}</table>`;
+  document.getElementById("finalScore").innerHTML = `<h3>Total Score: ${score}</h3>`;
 
-  const json = encodeURIComponent(JSON.stringify(questions));
-  const quizLink = `${window.location.origin}${window.location.pathname}?quiz=${json}`;
-  document.getElementById("shareLinks").innerHTML =
-    `<p>🔗 Share this Quiz Link:</p><a href="${quizLink}" target="_blank">${quizLink}</a>`;
+  const table = `
+    <table>
+      <tr><th>S.No</th><th>Question</th><th>Option Clicked</th><th>Answer</th></tr>
+      ${questions.map((q, i) => {
+        const correct = q.answer === q.userAnswer;
+        return `<tr>
+          <td>${q.s_no}</td>
+          <td>${q.question}</td>
+          <td class="${correct ? 'correct':'wrong'}">${q.userAnswer || '-'}</td>
+          <td>${q.answer}</td>
+        </tr>`;
+      }).join("")}
+    </table>`;
+  document.getElementById("reviewTable").innerHTML = table;
+
+  const shareText = encodeURIComponent(`I just completed a quiz! My score: ${score}`);
+  const shareUrl = window.location.href;
+  document.getElementById("shareLinks").innerHTML = `
+    <a href="https://wa.me/?text=${shareText} ${shareUrl}" target="_blank">📱 WhatsApp</a> |
+    <a href="mailto:?subject=My Quiz Result&body=${shareText} ${shareUrl}" target="_blank">📧 Gmail</a> |
+    <a href="https://www.facebook.com/sharer/sharer.php?u=${shareUrl}" target="_blank">📘 Facebook</a>`;
 }
 
-// Theme
-function applyTheme() {
-  const t = JSON.parse(localStorage.getItem("theme") || "{}");
-  document.documentElement.style.setProperty("--bg", t.bg || "#f4f6f9");
-  document.documentElement.style.setProperty("--text", t.text || "#000");
-  document.documentElement.style.setProperty("--btn", t.btn || "#007bff");
-}
-applyTheme();
-document.getElementById("saveTheme").onclick = () => {
-  const t = {
-    bg: bgColor.value,
-    text: textColor.value,
-    btn: btnColor.value
-  };
-  localStorage.setItem("theme", JSON.stringify(t));
+document.getElementById("saveTheme").addEventListener("click", () => {
+  localStorage.setItem("theme", JSON.stringify({
+    bg: document.getElementById("bgColor").value,
+    text: document.getElementById("textColor").value,
+    btn: document.getElementById("btnColor").value
+  }));
   applyTheme();
-};
-document.getElementById("resetTheme").onclick = () => {
+});
+
+document.getElementById("resetTheme").addEventListener("click", () => {
   localStorage.removeItem("theme");
   applyTheme();
-};
+});
 
-// Load quiz if shared
-window.addEventListener("load", () => {
-  const params = new URLSearchParams(location.search);
-  if (params.has("quiz")) {
-    try {
-      questions = JSON.parse(decodeURIComponent(params.get("quiz")));
-      document.getElementById("step1").classList.add("hidden");
-      document.getElementById("quizSection").classList.remove("hidden");
-      score = 0; current = 0; loadQuestion();
-    } catch { console.error("Invalid quiz data"); }
+function applyTheme() {
+  const theme = JSON.parse(localStorage.getItem("theme") || "{}");
+  document.documentElement.style.setProperty("--bg", theme.bg || "#f4f6f9");
+  document.documentElement.style.setProperty("--text", theme.text || "#000");
+  document.documentElement.style.setProperty("--btn", theme.btn || "#007bff");
+}
+
+applyTheme();
+// ===== Animated Visit Counter =====
+function animateCounter(element, start, end, duration) {
+  let startTime = null;
+  function update(currentTime) {
+    if (!startTime) startTime = currentTime;
+    const progress = Math.min((currentTime - startTime) / duration, 1);
+    const value = Math.floor(progress * (end - start) + start);
+    element.textContent = value.toLocaleString();
+    if (progress < 1) requestAnimationFrame(update);
   }
+  requestAnimationFrame(update);
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  const counterEl = document.getElementById("visitCount");
+  if (!counterEl) return;
+
+  let visits = parseInt(localStorage.getItem("visitCount") || "0");
+  visits++;
+  localStorage.setItem("visitCount", visits);
+
+  animateCounter(counterEl, 0, visits, 1000);
 });

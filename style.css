@@ -1,52 +1,97 @@
 body {
   font-family: "Noto Sans", sans-serif;
-  background: var(--bg, #f4f6f9);
+  background-color: var(--bg, #f4f6f9);
   color: var(--text, #000);
   margin: 0;
   padding: 0;
 }
+
 header {
-  background: #007bff;
-  color: #fff;
   text-align: center;
-  padding: 1rem;
+  background: #007bff;
+  color: white;
+  padding: 1em;
 }
+
 .card {
-  background: #fff;
-  max-width: 750px;
+  background: white;
   margin: 20px auto;
   padding: 20px;
   border-radius: 12px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  max-width: 700px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
 }
+
 button {
-  background: var(--btn, #007bff);
-  color: #fff;
-  padding: 10px 18px;
-  margin: 5px;
+  background-color: var(--btn, #007bff);
+  color: var(--text, #fff);
+  padding: 10px 20px;
   border: none;
   border-radius: 6px;
+  margin: 5px;
   cursor: pointer;
   font-weight: bold;
 }
-button:hover { opacity: 0.9; }
+
+button:hover {
+  opacity: 0.9;
+}
+
 .hidden { display: none; }
-.table-container { overflow-x: auto; margin-top: 10px; }
-table { width: 100%; border-collapse: collapse; }
-th, td { border: 1px solid #ddd; padding: 8px; }
-th { background: #007bff; color: #fff; }
+
+.table-container {
+  margin-top: 20px;
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+th, td {
+  border: 1px solid #ddd;
+  padding: 8px;
+}
+
+th {
+  background: #007bff;
+  color: white;
+}
+
 .correct { color: green; font-weight: bold; }
 .wrong { color: red; font-weight: bold; }
-.quiz-header { display: flex; justify-content: space-between; font-size: 1.2em; margin-bottom: 10px; }
+
+.quiz-header {
+  display: flex;
+  justify-content: space-between;
+  font-size: 1.3em;
+  margin-bottom: 15px;
+}
+
 #questionArea {
   background: #222;
   color: #fff;
+  padding: 20px;
   border-radius: 8px;
-  padding: 15px;
   font-size: 1.2em;
 }
-.optBtn { display: block; width: 100%; margin: 6px 0; text-align: left; }
-@media (max-width: 600px) {
-  .card { margin: 10px; padding: 15px; }
-  #questionArea { font-size: 1em; }
+.counter-box {
+  text-align: center;
+  font-size: 1.4em;
+  font-weight: bold;
+  color: #333;
+  background: #f0f8ff;
+  padding: 10px;
+  border-radius: 8px;
+  margin: 15px auto;
+  width: fit-content;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
+  animation: fadeIn 1s ease-in;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
 }

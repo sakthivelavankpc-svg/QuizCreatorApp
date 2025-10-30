@@ -1,49 +1,45 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Smart Quiz App</title>
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <header><h1>📘 Smart Quiz App</h1></header>
+  <header>
+    <h1>📘 Smart Quiz App</h1>
+  </header>
+    <div id="visitCounter" class="counter-box">
+    👁️ Visits: <span id="visitCount">0</span>
+  </div>
+
 
   <section id="step1" class="card">
     <h2>Step 1: Upload or Create Quiz</h2>
     <button id="downloadTemplate">📥 Download Template CSV</button>
-    <input type="file" id="csvFile" accept=".csv" />
+    <input type="file" id="csvFile" accept=".csv">
     <button id="loadCSV">📂 Load CSV</button>
-    <button id="createManual">✏ Create Questions Manually</button>
+    <button id="createManual">✏️ Create Questions Manually</button>
 
-    <div id="manualForm" class="hidden">
+    <div id="manualForm" style="display:none;">
       <h3>Create Questions</h3>
-      <div class="table-container">
-        <table id="manualTable">
-          <thead>
-            <tr>
-              <th>S.No</th><th>Question</th><th>A</th><th>B</th>
-              <th>C</th><th>D</th><th>Answer</th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
-      </div>
+      <div id="questionContainer"></div>
       <button id="addQuestion">➕ Add Question</button>
       <button id="saveManual">💾 Save Questions</button>
     </div>
 
     <div id="csvPreview" class="table-container"></div>
 
-    <h3>Exam Settings</h3>
-    <label><input type="radio" name="timeMode" value="perQ" /> Per-Question Time</label>
-    <label><input type="radio" name="timeMode" value="total" /> Total Exam Time</label>
-    <input type="number" id="timeInput" placeholder="Time (seconds)" />
-    <br /><br />
-    <label><input type="radio" name="markMode" value="perQ" /> Per-Question Marks</label>
-    <label><input type="radio" name="markMode" value="total" /> Total Marks</label>
-    <input type="number" id="markInput" placeholder="Marks" />
-    <input type="number" id="passMarks" placeholder="Minimum Pass Marks" />
+    <h3>Set Exam Settings</h3>
+    <label><input type="radio" name="timeMode" value="perQ"> Time per Question</label>
+    <label><input type="radio" name="timeMode" value="total"> Total Exam Time</label>
+    <input type="number" id="timeInput" placeholder="Time (seconds)">
+    <br><br>
+    <label><input type="radio" name="markMode" value="perQ"> Marks per Question</label>
+    <label><input type="radio" name="markMode" value="total"> Total Marks</label>
+    <input type="number" id="markInput" placeholder="Marks">
+    <input type="number" id="passMarks" placeholder="Minimum Pass Marks">
 
     <button id="startQuiz">🚀 Start Quiz</button>
   </section>
@@ -65,14 +61,16 @@
     <div id="reviewTable"></div>
     <div id="finalScore"></div>
     <button id="printReview">🖨 Print</button>
+
+    <h3>Share your quiz</h3>
     <div id="shareLinks"></div>
   </section>
 
   <section id="themeSection" class="card">
     <h2>🎨 Theme Settings</h2>
-    <label>Background <input type="color" id="bgColor" /></label>
-    <label>Text <input type="color" id="textColor" /></label>
-    <label>Button <input type="color" id="btnColor" /></label>
+    <label>Background Color: <input type="color" id="bgColor"></label>
+    <label>Text Color: <input type="color" id="textColor"></label>
+    <label>Button Color: <input type="color" id="btnColor"></label>
     <button id="saveTheme">💾 Save Theme</button>
     <button id="resetTheme">♻ Reset Default</button>
   </section>
