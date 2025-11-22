@@ -1,13 +1,13 @@
 :root {
-  /* CHANGED: New Vibrant Button Color Scheme (Teal & Orange) */
-  --primary: #0d9488;       /* Teal 600 */
-  --primary-dark: #0f766e;  /* Teal 700 */
+  /* Vibrant Teal & Orange Theme */
+  --primary: #0d9488;       
+  --primary-dark: #0f766e;  
   --secondary: #f3f4f6;
   --text-main: #1f2937;
   --text-light: #6b7280;
-  --bg-body: #f0fdfa;       /* Very light teal tint */
+  --bg-body: #f0fdfa;       
   --surface: #ffffff;
-  --accent: #f97316;        /* Orange 500 - High Contrast */
+  --accent: #f97316;        
   --success: #10b981;
   --danger: #ef4444;
   --border: #e5e7eb;
@@ -15,9 +15,9 @@
   --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
 
-/* Dark Theme Updates */
+/* Dark Theme */
 body.dark-mode {
-  --primary: #14b8a6;       /* Teal 500 */
+  --primary: #14b8a6;       
   --bg-body: #111827;
   --surface: #1f2937;
   --text-main: #f3f4f6;
@@ -61,7 +61,7 @@ body {
 .panel, .creator-panel { background: var(--surface); border-radius: var(--radius); box-shadow: var(--shadow); padding: 20px; margin-bottom: 20px; transition: all 0.3s ease; }
 .hidden { display: none !important; }
 
-/* --- LIBRARY GRID (Cards) --- */
+/* --- LIBRARY GRID --- */
 .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
 .section-header h3 { margin: 0; display: flex; align-items: center; gap: 8px; }
 .badge-count { background: var(--secondary); padding: 4px 8px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; }
@@ -79,14 +79,13 @@ body {
 .card-sub { font-size: 0.9rem; color: var(--text-light); }
 .card-actions { display: flex; gap: 10px; margin-top: auto; padding-top: 10px; }
 
-/* --- INPUTS & FORMS --- */
+/* --- INPUTS --- */
 input, select, textarea {
   width: 100%; padding: 12px; border: 1px solid var(--border); 
   border-radius: 8px; background: var(--bg-body); color: var(--text-main);
   font-size: 1rem; outline: none; transition: border 0.2s;
 }
 input:focus, select:focus { border-color: var(--primary); ring: 2px solid var(--primary); }
-
 .input-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
 .input-grid.three-col { grid-template-columns: 1fr 1fr 1fr; }
 .full-width { width: 100%; margin-top: 10px; }
@@ -100,13 +99,10 @@ button { cursor: pointer; font-family: inherit; transition: all 0.2s; border: no
 .btn-sm { padding: 6px 12px; border-radius: 6px; font-size: 0.9rem; }
 .btn-full { width: 100%; padding: 14px; font-size: 1.1rem; margin-top: 10px; border-radius: 8px; font-weight: 700; }
 .play-btn { background: var(--success); color: white; }
-/* WhatsApp Green */
 .btn-whatsapp { background: #25D366; color: white; width: 100%; margin-bottom: 8px; padding: 10px; border-radius: 8px; font-weight: 600; }
-/* Email Red */
 .btn-email { background: #EA4335; color: white; width: 100%; padding: 10px; border-radius: 8px; font-weight: 600; }
 
-
-/* --- QUIZ INTERFACE --- */
+/* --- QUIZ UI --- */
 .quiz-interface { height: 100vh; display: flex; flex-direction: column; position: fixed; top: 0; left: 0; width: 100%; background: var(--bg-body); z-index: 200; padding: 15px; }
 .quiz-top-bar { display: flex; align-items: center; gap: 15px; margin-bottom: 15px; background: var(--surface); padding: 10px; border-radius: 10px; box-shadow: var(--shadow); }
 .timer-badge { font-weight: bold; color: var(--danger); display: flex; align-items: center; gap: 5px; min-width: 80px; }
@@ -137,23 +133,13 @@ button { cursor: pointer; font-family: inherit; transition: all 0.2s; border: no
 .nav-btn { flex: 1; background: var(--secondary); padding: 12px; border-radius: 10px; font-size: 1.2rem; }
 .finish-btn { flex: 2; background: var(--primary); color: white; padding: 12px; border-radius: 10px; font-weight: 700; }
 
-/* --- TOASTS --- */
 .toast-container { position: fixed; top: 20px; right: 20px; z-index: 2000; display: flex; flex-direction: column; gap: 10px; }
 .toast { background: #333; color: white; padding: 12px 20px; border-radius: 8px; font-size: 0.9rem; animation: slideIn 0.3s ease; box-shadow: 0 10px 15px rgba(0,0,0,0.2); }
 @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
 
-/* --- MEDIA QUERIES --- */
-@media (min-width: 768px) {
-  .options-grid { grid-template-columns: 1fr 1fr; }
-  .input-grid { grid-template-columns: 1fr 1fr; }
-}
-@media (max-width: 600px) {
-  .header-content { padding: 0 15px; }
-  .input-grid, .input-grid.three-col { grid-template-columns: 1fr; }
-  .q-text { font-size: 1.1rem; }
-}
+@media (min-width: 768px) { .options-grid, .input-grid { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 600px) { .header-content { padding: 0 15px; } .input-grid, .input-grid.three-col { grid-template-columns: 1fr; } }
 
-/* --- UTILS --- */
 .bounce-in { animation: bounceIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
 @keyframes bounceIn { 0% { transform: scale(0.8); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
 .table-wrapper { overflow-x: auto; border: 1px solid var(--border); border-radius: 8px; margin: 10px 0; }
@@ -161,11 +147,25 @@ table { width: 100%; border-collapse: collapse; min-width: 500px; }
 th, td { padding: 10px; text-align: left; border-bottom: 1px solid var(--border); }
 th { background: var(--secondary); font-weight: 600; }
 
-/* --- PRINT STYLES --- */
+/* --- PRINT PDF STYLES --- */
 @media print {
+    body { background: white; color: black; }
     body * { visibility: hidden; }
+    
+    /* Only show the Review Section */
     #reviewSection, #reviewSection * { visibility: visible; }
-    #reviewSection { position: absolute; left: 0; top: 0; width: 100%; margin: 0; box-shadow: none; }
-    .share-actions, #homeBtn_review, #printPdfBtn { display: none !important; }
-    .app-header { display: none; }
+    
+    #reviewSection { 
+        position: absolute; left: 0; top: 0; width: 100%; margin: 0; 
+        box-shadow: none; border: none; padding: 0; 
+    }
+    
+    /* IMPORTANT: Force Background Colors to Print */
+    .table-wrapper, table, tr, td, th {
+        -webkit-print-color-adjust: exact; 
+        print-color-adjust: exact; 
+    }
+
+    /* Hide Buttons and Header */
+    .share-actions, #homeBtn_review, #printPdfBtn, .app-header, .toast-container { display: none !important; }
 }

@@ -6,7 +6,6 @@
   const formatTime = (s) => `${Math.floor(s/60).toString().padStart(2,'0')}:${(s%60).toString().padStart(2,'0')}`;
   const STORAGE_LIB_KEY = "quiz_library_db";
 
-  /* --- TOAST SYSTEM --- */
   function showToast(msg, type = 'info') {
       const container = $("toastContainer");
       const toast = document.createElement("div");
@@ -17,54 +16,33 @@
       setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 300); }, 3000);
   }
 
-  /* --- THEME TOGGLE --- */
   $("themeToggleBtn").addEventListener("click", () => {
       document.body.classList.toggle("dark-mode");
       const icon = document.querySelector("#themeToggleBtn i");
-      if(document.body.classList.contains("dark-mode")){
-          icon.className = "ri-sun-line";
-      } else {
-          icon.className = "ri-moon-line";
-      }
+      icon.className = document.body.classList.contains("dark-mode") ? "ri-sun-line" : "ri-moon-line";
   });
 
-  /* --- STATE --- */
   let quizData = [], currentQuestion = 0, userAnswers = [], isStudentMode = false;
   let studentDetails = { name: "", place: "" };
   let mainTimerInterval, questionTimerInterval, autoAdvanceTimer;
   let totalSeconds = 0, elapsedSeconds = 0, perQuestionRemaining = 0;
 
-  /* --- INIT --- */
   window.addEventListener('load', () => {
       renderLibraryGrid();
       checkUrlForSharedQuiz();
   });
 
-  $("toggleCreatorBtn").addEventListener("click", () => {
-      show($("creatorPanel"));
-      hide($("librarySection"));
-      $("toggleCreatorBtn").classList.add("hidden");
-  });
-  
-  $("closeCreatorBtn").addEventListener("click", () => {
-      hide($("creatorPanel"));
-      show($("librarySection"));
-      show($("toggleCreatorBtn"));
-  });
+  $("toggleCreatorBtn").addEventListener("click", () => { show($("creatorPanel")); hide($("librarySection")); $("toggleCreatorBtn").classList.add("hidden"); });
+  $("closeCreatorBtn").addEventListener("click", () => { hide($("creatorPanel")); show($("librarySection")); show($("toggleCreatorBtn")); });
 
-  /* --- LIBRARY (CARDS) --- */
   function renderLibraryGrid() {
       const lib = JSON.parse(localStorage.getItem(STORAGE_LIB_KEY) || "[]");
       const grid = $("libraryGrid");
-      const count = $("libCount");
+      $("libCount").textContent = `${lib.length} Quiz${lib.length !== 1 ? 'zes' : ''}`;
       grid.innerHTML = "";
-      count.textContent = `${lib.length} Quiz${lib.length !== 1 ? 'zes' : ''}`;
 
       if (lib.length === 0) {
-          grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1; text-align:center; padding:40px; color:#888;">
-              <i class="ri-folder-add-line" style="font-size:3rem; margin-bottom:10px; display:block;"></i>
-              <p>Your library is empty.</p>
-          </div>`;
+          grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1; text-align:center; padding:40px; color:#888;"><i class="ri-folder-add-line" style="font-size:3rem;"></i><p>Your library is empty.</p></div>`;
           return;
       }
 
@@ -75,46 +53,39 @@
             <span class="card-badge">${escapeHtml(quiz.meta.class)}</span>
             <h4 class="card-title">${escapeHtml(quiz.meta.exam)}</h4>
             <div class="card-sub">${escapeHtml(quiz.meta.subject)} • ${escapeHtml(quiz.meta.topic)}</div>
-            <div class="card-sub" style="font-size:0.8rem">❓ ${quiz.questions.length} Questions</div>
+            <div class="card-sub" style="font-size:0.8rem">❓ ${quiz.questions.length} Qs</div>
             <div class="card-actions">
                 <button class="btn-sm btn-primary play-lib-btn" style="flex:1">Play</button>
                 <button class="btn-sm btn-secondary del-lib-btn" style="color:var(--danger)"><i class="ri-delete-bin-line"></i></button>
-            </div>
-          `;
-          
+            </div>`;
           card.querySelector(".play-lib-btn").onclick = () => loadQuizFromLibrary(index);
           card.querySelector(".del-lib-btn").onclick = () => deleteFromLibrary(index);
           grid.appendChild(card);
       });
   }
 
-  /* --- SAVE LOGIC (Common) --- */
   function saveQuizLogic() {
       const data = getCurrentData();
       if (!data.length) return showToast("Add questions first!", "error");
-      
       const exam = $("metaExam").value.trim();
       const sub = $("metaSubject").value.trim();
-      const topic = $("metaTopic").value.trim();
       const cls = $("metaClass").value;
-
       if (!exam || !sub || !cls) return showToast("Enter Exam, Subject & Class details.", "error");
 
-      const newQuiz = { id: Date.now(), meta: { exam, subject: sub, topic, class: cls }, config: getConfig(), questions: data };
+      const newQuiz = { id: Date.now(), meta: { exam, subject: sub, topic: $("metaTopic").value, class: cls }, config: getConfig(), questions: data };
       const lib = JSON.parse(localStorage.getItem(STORAGE_LIB_KEY) || "[]");
-      lib.unshift(newQuiz); // Add to top
+      lib.unshift(newQuiz);
       localStorage.setItem(STORAGE_LIB_KEY, JSON.stringify(lib));
-      
       showToast("Quiz saved to Library!");
       renderLibraryGrid();
-      $("closeCreatorBtn").click(); // Go back to library
+      $("closeCreatorBtn").click();
   }
 
   $("saveToLibraryBtn").addEventListener("click", saveQuizLogic);
   $("saveCsvToLibBtn").addEventListener("click", saveQuizLogic);
 
   function deleteFromLibrary(index) {
-      if(!confirm("Delete this quiz?")) return;
+      if(!confirm("Delete?")) return;
       const lib = JSON.parse(localStorage.getItem(STORAGE_LIB_KEY) || "[]");
       lib.splice(index, 1);
       localStorage.setItem(STORAGE_LIB_KEY, JSON.stringify(lib));
@@ -124,12 +95,9 @@
   function loadQuizFromLibrary(index) {
       const lib = JSON.parse(localStorage.getItem(STORAGE_LIB_KEY) || "[]");
       const quiz = lib[index];
-      if (!quiz) return;
-      applyConfig(quiz.config);
-      initQuiz(quiz.questions);
+      if (quiz) { applyConfig(quiz.config); initQuiz(quiz.questions); }
   }
 
-  /* --- HELPERS --- */
   function getCurrentData() {
       if (!$("manualSection").classList.contains("hidden")) {
           return [...document.querySelectorAll("#manualTable tbody tr")].map(tr => {
@@ -141,20 +109,15 @@
   }
 
   function getConfig() {
-      return {
-          time: $("totalMinutes").value, perQ: $("perQuestionSeconds").value,
-          marks: $("totalMarks").value, pass: $("minPassMarks").value,
-          shuffle: $("shuffleQuestions").checked, contact: $("teacherWhatsapp").value
-      };
+      return { time: $("totalMinutes").value, perQ: $("perQuestionSeconds").value, marks: $("totalMarks").value, pass: $("minPassMarks").value, shuffle: $("shuffleQuestions").checked, contact: $("teacherWhatsapp").value };
   }
 
   function applyConfig(cfg) {
-      $("totalMinutes").value = cfg.time || ""; $("perQuestionSeconds").value = cfg.perQ || "";
-      $("totalMarks").value = cfg.marks || 100; $("minPassMarks").value = cfg.pass || 40;
-      $("shuffleQuestions").checked = cfg.shuffle || false; $("teacherWhatsapp").value = cfg.contact || "";
+      $("totalMinutes").value = cfg.time||""; $("perQuestionSeconds").value = cfg.perQ||"";
+      $("totalMarks").value = cfg.marks||100; $("minPassMarks").value = cfg.pass||40;
+      $("shuffleQuestions").checked = cfg.shuffle||false; $("teacherWhatsapp").value = cfg.contact||"";
   }
 
-  /* --- CSV & MANUAL --- */
   $("loadCSVBtn").addEventListener("click", () => $("csvFileInput").click());
   $("csvFileInput").addEventListener("change", (e) => {
     const file = e.target.files[0];
@@ -162,33 +125,15 @@
     const reader = new FileReader();
     reader.onload = (ev) => {
       const lines = ev.target.result.split(/\r?\n/).filter(l => l.trim());
-      if (lines.length < 2) return showToast("Invalid CSV file", "error");
-      const header = lines[0].split(",").map(h => h.trim().toLowerCase());
+      if (lines.length < 2) return showToast("Invalid CSV", "error");
       const rows = lines.slice(1).map(line => {
         const cols = line.split(","); 
-        const obj = {}; header.forEach((h, i) => obj[h] = (cols[i] || "").trim());
-        return { question: obj.question||cols[0], A: obj.a||cols[1], B: obj.b||cols[2], C: obj.c||cols[3], D: obj.d||cols[4], answer: obj.answer||cols[5] };
+        return { question: cols[0]||"", A: cols[1]||"", B: cols[2]||"", C: cols[3]||"", D: cols[4]||"", answer: cols[5]||"" };
       });
       $("csvPreview")._rows = rows;
-      
-      // FEATURE: Detailed CSV Table with Options A, B, C, D, Answer
-      $("csvTableContainer").innerHTML = `<table><thead>
-          <tr><th>#</th><th>Question</th><th>A</th><th>B</th><th>C</th><th>D</th><th>Correct</th></tr>
-        </thead><tbody>${rows.map((r,i)=>`
-          <tr>
-            <td>${i+1}</td>
-            <td>${escapeHtml(r.question)}</td>
-            <td>${escapeHtml(r.A)}</td>
-            <td>${escapeHtml(r.B)}</td>
-            <td>${escapeHtml(r.C)}</td>
-            <td>${escapeHtml(r.D)}</td>
-            <td style="font-weight:bold; color:var(--success)">${escapeHtml(r.answer)}</td>
-          </tr>`).join('')}</tbody></table>`;
-      
-      show($("csvPreview")); 
-      hide($("manualSection"));
-      // FEATURE: Ask to Save
-      showToast("CSV Loaded! Please review and SAVE the quiz.", "info");
+      $("csvTableContainer").innerHTML = `<table><thead><tr><th>#</th><th>Question</th><th>A</th><th>B</th><th>C</th><th>D</th><th>Correct</th></tr></thead><tbody>${rows.map((r,i)=>`<tr><td>${i+1}</td><td>${escapeHtml(r.question)}</td><td>${r.A}</td><td>${r.B}</td><td>${r.C}</td><td>${r.D}</td><td style="font-weight:bold;color:green">${r.answer}</td></tr>`).join('')}</tbody></table>`;
+      show($("csvPreview")); hide($("manualSection"));
+      showToast("CSV Loaded! Please SAVE the quiz.", "info");
     };
     reader.readAsText(file);
   });
@@ -203,18 +148,15 @@
   $("startQuizBtn_manual").addEventListener("click", () => initQuiz(getCurrentData()));
   $("startQuizBtn_csv").addEventListener("click", () => initQuiz(getCurrentData()));
 
-  /* --- GAMEPLAY --- */
   function initQuiz(data) {
-      if (!data || !data.length) return showToast("No questions to play!", "error");
-      if (!isStudentMode && !studentDetails.name) {
-           show($("studentLoginModal")); window.tempQuizData = data; return;
-      }
+      if (!data || !data.length) return showToast("No questions!", "error");
+      if (!isStudentMode && !studentDetails.name) { show($("studentLoginModal")); window.tempQuizData = data; return; }
       runQuiz(data);
   }
 
   $("startStudentQuizBtn").addEventListener("click", () => {
       const name = $("studentName").value; const place = $("studentPlace").value;
-      if(!name) return showToast("Name is required", "error");
+      if(!name) return showToast("Name required", "error");
       studentDetails = { name, place };
       hide($("studentLoginModal"));
       $("dispName").textContent = name; $("dispPlace").textContent = place || "Unknown";
@@ -259,10 +201,7 @@
       const totalM = parseFloat($("totalMarks").value) || 100;
       const valPerQ = totalM / quizData.length;
       $("liveScore").textContent = `Score: ${Math.round(score * valPerQ)}`;
-
-      autoAdvanceTimer = setTimeout(() => {
-          if(currentQuestion<quizData.length-1) { currentQuestion++; renderQuestion(); } else finishQuiz();
-      }, 1500);
+      autoAdvanceTimer = setTimeout(() => { if(currentQuestion<quizData.length-1) { currentQuestion++; renderQuestion(); } else finishQuiz(); }, 1500);
   };
 
   $("prevBtn").addEventListener("click",()=>{if(currentQuestion>0){currentQuestion--;renderQuestion();}});
@@ -289,39 +228,78 @@
       clearInterval(mainTimerInterval); clearInterval(questionTimerInterval); clearTimeout(autoAdvanceTimer);
       hide($("quizSection")); show($("reviewSection")); show($("appContainer").querySelector(".app-header"));
       
-      let score = 0, correct = 0;
+      let score = 0, correct = 0, skipped = 0;
       const totalM = parseFloat($("totalMarks").value) || 100;
       const markPerQ = totalM / quizData.length;
       
-      // FEATURE: Detailed Result Table for Printing
-      let html = `
-      <div style="text-align:center; margin-bottom:20px;">
-        <h3>${studentDetails.name} - ${studentDetails.place}</h3>
-      </div>
-      <table style="font-size:0.9rem">
-        <thead>
-            <tr><th>#</th><th>Question</th><th>Your Answer</th><th>Correct Answer</th><th>Status</th></tr>
-        </thead>
-        <tbody>`;
-      
+      // Generate Table Rows
+      let rowsHtml = '';
       quizData.forEach((q, i) => {
-          const u = userAnswers[i]||""; 
-          const c = q.answer||"";
-          const isCorrect = u === c;
-          if(isCorrect) { score+=markPerQ; correct++; }
+          const u = (userAnswers[i] || "").trim();
+          const c = (q.answer || "").trim();
+          let statusIcon, rowColor;
+
+          if(!u) {
+              skipped++;
+              statusIcon = '⚪ Skipped';
+              rowColor = 'transparent';
+          } else if(u === c) {
+              score += markPerQ;
+              correct++;
+              statusIcon = '✅ Correct';
+              rowColor = 'rgba(16, 185, 129, 0.1)';
+          } else {
+              statusIcon = '❌ Wrong';
+              rowColor = 'rgba(239, 68, 68, 0.1)';
+          }
           
-          html += `<tr style="background:${isCorrect?'rgba(16,185,129,0.1)':'rgba(239,68,68,0.1)'}">
-            <td>${i+1}</td>
+          rowsHtml += `
+          <tr style="background:${rowColor};">
+            <td>${i + 1}</td>
             <td>${escapeHtml(q.question)}</td>
-            <td>${escapeHtml(u) || '<span style="color:gray">Skipped</span>'}</td>
-            <td>${escapeHtml(c)}</td>
-            <td>${isCorrect ? '✅' : '❌'}</td>
+            <td style="font-weight:500">${escapeHtml(u) || '<span style="color:gray; font-style:italic">No Answer</span>'}</td>
+            <td style="font-weight:bold">${escapeHtml(c)}</td>
+            <td>${statusIcon}</td>
           </tr>`;
       });
-      html += `</tbody></table>`;
+
+      // Report Card Header (Visible in Print)
+      const summaryHtml = `
+      <div style="margin-bottom: 20px; padding: 15px; border: 1px solid #ccc; border-radius: 8px; background: #f9fafb;">
+        <h2 style="margin:0 0 10px 0; color:var(--primary)">Student Report Card</h2>
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; font-size: 0.95rem;">
+            <div><strong>Name:</strong> ${escapeHtml(studentDetails.name || "Guest")}</div>
+            <div><strong>Location:</strong> ${escapeHtml(studentDetails.place || "-")}</div>
+            <div><strong>Date:</strong> ${new Date().toLocaleDateString()}</div>
+            <div><strong>Time Taken:</strong> ${$("mainTimerLabel").textContent}</div>
+        </div>
+        <hr style="margin: 10px 0; border: 0; border-top: 1px solid #ddd;">
+        <div style="display:flex; justify-content:space-around; font-weight:bold;">
+            <span>🏆 Score: ${Math.round(score)}/${totalM}</span>
+            <span style="color:green">✅ Correct: ${correct}</span>
+            <span style="color:red">❌ Wrong: ${quizData.length - correct - skipped}</span>
+            <span style="color:gray">⚪ Skipped: ${skipped}</span>
+        </div>
+      </div>`;
       
+      const tableHtml = `
+      ${summaryHtml}
+      <table style="width:100%; font-size:0.9rem; border-collapse:collapse;">
+        <thead>
+            <tr style="background:#f3f4f6; border-bottom:2px solid #ddd;">
+                <th style="padding:10px; text-align:left;">#</th>
+                <th style="padding:10px; text-align:left;">Question</th>
+                <th style="padding:10px; text-align:left;">Your Answer</th>
+                <th style="padding:10px; text-align:left;">Correct Answer</th>
+                <th style="padding:10px; text-align:left;">Result</th>
+            </tr>
+        </thead>
+        <tbody>${rowsHtml}</tbody>
+      </table>`;
+
       $("finalScoreDisplay").textContent = Math.round(score);
-      $("reviewTableContainer").innerHTML = html;
+      $("reviewTableContainer").innerHTML = tableHtml;
+      
       const pass = parseFloat($("minPassMarks").value)||0;
       $("passFailText").innerHTML = score >= pass ? "<span style='color:var(--success)'>PASSED</span>" : "<span style='color:var(--danger)'>FAILED</span>";
 
@@ -331,14 +309,9 @@
       $("submitEmailBtn").onclick = () => window.open(`mailto:?body=${encodeURIComponent(txt)}`, "_self");
   }
 
-  // FEATURE: Print PDF
-  $("printPdfBtn").addEventListener("click", () => {
-      window.print();
-  });
-
+  $("printPdfBtn").addEventListener("click", () => window.print());
   $("homeBtn_review").addEventListener("click", () => location.reload());
 
-  /* --- SHARING --- */
   function checkUrlForSharedQuiz() {
       const hash = location.hash;
       if (hash && hash.includes("quiz=")) {
@@ -360,9 +333,7 @@
       show($("shareModal"));
   });
   
-  $("copyLinkBtn").addEventListener("click", () => {
-      $("shareLinkInput").select(); document.execCommand("copy"); showToast("Link copied to clipboard!");
-  });
+  $("copyLinkBtn").addEventListener("click", () => { $("shareLinkInput").select(); document.execCommand("copy"); showToast("Copied!"); });
   $("closeShareBtn").addEventListener("click", () => hide($("shareModal")));
 
 })();
